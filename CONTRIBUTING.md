@@ -26,7 +26,7 @@ There are several ways you can help improve Projex:
 2. **Clone** your fork locally:
 
    ```bash
-   git clone https://github.com/<your-username>/projex.git
+   git clone https://github.com/ChAbdulWahhab/projex.git
    cd projex
    ```
 
