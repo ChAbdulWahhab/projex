@@ -1,0 +1,47 @@
+from setuptools import setup, find_packages
+
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
+setup(
+    name="projex-cli",
+    version="0.1.3",
+    author="Ch. Abdul Wahab",
+    author_email="ch.abdul.wahhab@proton.me",
+    description="A powerful CLI tool to generate Python project boilerplates",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/ChAbdulWahhab/projex",
+    project_urls={
+        "Bug Reports": "https://github.com/ChAbdulWahhab/projex/issues",
+        "Source": "https://github.com/ChAbdulWahhab/projex",
+    },
+    packages=find_packages(),
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
+        "Topic :: Software Development :: Code Generators",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+    ],
+    python_requires=">=3.8",
+    install_requires=[
+        "click>=8.0.0",
+        "jinja2>=3.0.0",
+        "rich>=10.0.0",
+        "pyyaml>=6.0",
+    ],
+    entry_points={
+        "console_scripts": [
+            "projex=projex.cli:main",
+        ],
+    },
+    include_package_data=True,
+    package_data={
+        "projex": ["templates/**/*"],
+    },
+)
