@@ -95,6 +95,145 @@ AVAILABLE_TEMPLATES = {
             'flake8>=6.0.0',
             'Flask-Testing>=0.8.1',
         ]
+    },
+    'bottle': {
+        'description': 'Fast and simple micro-framework for small web applications',
+        'features': [
+            'Single file framework',
+            'Built-in development server',
+            'Template engine',
+            'Simple routing',
+            'CORS support',
+            'WSGI compatible',
+            'Docker support',
+            'pytest setup'
+        ],
+        'dependencies': [
+            'bottle>=0.12.25',
+            'python-dotenv>=1.0.0',
+            'gunicorn>=21.2.0',
+            'psycopg2-binary>=2.9.9',
+        ],
+        'dev_dependencies': [
+            'pytest>=7.4.0',
+            'pytest-bottle>=0.1.0',
+            'black>=23.0.0',
+            'flake8>=6.0.0',
+        ]
+    },
+    'pyramid': {
+        'description': 'Flexible web framework for large applications',
+        'features': [
+            'Flexible architecture',
+            'Traversal and URL dispatch',
+            'Security policies',
+            'SQLAlchemy integration',
+            'Alembic migrations',
+            'CORS support',
+            'Docker support',
+            'pytest setup'
+        ],
+        'dependencies': [
+            'pyramid>=2.0.2',
+            'waitress>=2.1.2',
+            'sqlalchemy>=2.0.0',
+            'alembic>=1.12.0',
+            'zope.sqlalchemy>=2.0',
+            'python-dotenv>=1.0.0',
+            'psycopg2-binary>=2.9.9',
+            'pyramid-cors>=0.1',
+        ],
+        'dev_dependencies': [
+            'pytest>=7.4.0',
+            'pytest-cov>=4.1.0',
+            'webtest>=3.0.0',
+            'black>=23.0.0',
+            'flake8>=6.0.0',
+        ]
+    },
+    'tornado': {
+        'description': 'Asynchronous web framework and networking library',
+        'features': [
+            'Async/await support',
+            'Non-blocking I/O',
+            'WebSocket support',
+            'SQLAlchemy integration',
+            'JWT authentication',
+            'CORS support',
+            'Docker support',
+            'pytest setup'
+        ],
+        'dependencies': [
+            'tornado>=6.4.0',
+            'sqlalchemy>=2.0.0',
+            'alembic>=1.12.0',
+            'python-dotenv>=1.0.0',
+            'psycopg2-binary>=2.9.9',
+            'python-jose[cryptography]>=3.3.0',
+            'passlib[bcrypt]>=1.7.4',
+        ],
+        'dev_dependencies': [
+            'pytest>=7.4.0',
+            'pytest-tornado>=0.8.1',
+            'pytest-asyncio>=0.21.0',
+            'black>=23.0.0',
+            'flake8>=6.0.0',
+        ]
+    },
+    'sanic': {
+        'description': 'Fast async web framework built on uvloop',
+        'features': [
+            'Async/await support',
+            'High performance',
+            'Built-in async ORM',
+            'Automatic API docs',
+            'WebSocket support',
+            'CORS support',
+            'Docker support',
+            'pytest setup'
+        ],
+        'dependencies': [
+            'sanic>=23.12.0',
+            'sanic-ext>=23.12.0',
+            'sanic-cors>=2.0.0',
+            'python-dotenv>=1.0.0',
+            'psycopg2-binary>=2.9.9',
+            'asyncpg>=0.29.0',
+        ],
+        'dev_dependencies': [
+            'pytest>=7.4.0',
+            'pytest-asyncio>=0.21.0',
+            'pytest-sanic>=1.1.0',
+            'httpx>=0.25.0',
+            'black>=23.0.0',
+            'flake8>=6.0.0',
+        ]
+    },
+    'cherrypy': {
+        'description': 'Minimalist Python web framework',
+        'features': [
+            'Object-oriented design',
+            'Built-in HTTP server',
+            'Plugin system',
+            'Session management',
+            'CORS support',
+            'RESTful routing',
+            'Docker support',
+            'pytest setup'
+        ],
+        'dependencies': [
+            'cherrypy>=18.9.0',
+            'python-dotenv>=1.0.0',
+            'sqlalchemy>=2.0.0',
+            'psycopg2-binary>=2.9.9',
+            'cherrypy-cors>=1.0.0',
+        ],
+        'dev_dependencies': [
+            'pytest>=7.4.0',
+            'pytest-cov>=4.1.0',
+            'black>=23.0.0',
+            'flake8>=6.0.0',
+        ]
     }
 }
 
@@ -187,7 +326,15 @@ cp .env.example .env
 # Edit .env with your configuration
 ```
 
-4. Run the application:
+4. Setup database:
+```bash
+# For PostgreSQL/MySQL: Run migrations
+# For FastAPI: alembic upgrade head
+# For Django: python manage.py migrate
+# For Flask: flask db upgrade
+```
+
+5. Run the application:
 ```bash
 {run_command}
 ```
@@ -197,6 +344,24 @@ cp .env.example .env
 ```
 {project_structure}
 ```
+
+## Database Setup
+
+The project is configured to use {database_type}. Update the `DATABASE_URL` in `.env` file with your database credentials.
+
+### Using Docker
+
+```bash
+docker-compose up -d
+```
+
+This will start the application and database service.
+
+### Manual Database Setup
+
+1. Install and start your database server
+2. Update `DATABASE_URL` in `.env` file
+3. Run migrations (see step 4 in Setup)
 
 ## API Documentation
 
