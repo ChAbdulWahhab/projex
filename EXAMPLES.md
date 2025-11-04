@@ -420,6 +420,221 @@ git commit -m "Initial commit"
 
 ---
 
+## Advanced Workflows
+
+### Complete Production Setup
+
+```bash
+# 1. Create project with all features
+projex create my-api \
+  --template fastapi \
+  --db postgresql \
+  --auth jwt \
+  --style full \
+  --license mit
+
+cd my-api
+
+# 2. Add CI/CD
+projex add cicd --provider github
+
+# 3. Add documentation
+projex add docs --tool mkdocs
+
+# 4. Add quality tools
+projex add quality-tools
+
+# 5. Add Makefile
+projex add makefile
+
+# 6. Create environments
+projex env add development
+projex env add staging
+projex env add production
+
+# 7. Add enhanced testing
+projex add test-config --enhanced
+
+# 8. Validate everything
+projex validate
+```
+
+### Microservices Architecture
+
+```bash
+# Create multiple services
+projex create user-service --template fastapi --path services/
+projex create order-service --template fastapi --path services/
+projex create payment-service --template fastapi --path services/
+
+# Add CI/CD to each
+cd services/user-service && projex add cicd --provider github
+cd ../order-service && projex add cicd --provider github
+cd ../payment-service && projex add cicd --provider github
+```
+
+### Adding Components to Existing Project
+
+```bash
+cd my-project
+
+# Add models
+projex add model User --fields name:str,email:str,age:int
+projex add model Product --fields name:str,price:float,stock:int
+
+# Add endpoints
+projex add endpoint users --crud
+projex add endpoint products --crud
+
+# Add services
+projex add service email --async
+projex add service notification
+
+# Add middleware
+projex add middleware cors
+projex add middleware auth
+```
+
+### Database Selection Examples
+
+```bash
+# PostgreSQL (default)
+projex create my-api --template fastapi --db postgresql
+
+# MySQL
+projex create my-api --template django --db mysql
+
+# MongoDB
+projex create my-api --template fastapi --db mongodb
+
+# SQLite (for development)
+projex create my-api --template flask --db sqlite
+
+# Redis (for caching)
+projex create my-api --template fastapi --db redis
+```
+
+### Authentication Examples
+
+```bash
+# JWT Authentication
+projex create my-api --template fastapi --auth jwt
+
+# OAuth2
+projex create my-api --template fastapi --auth oauth2
+
+# API Key
+projex create my-api --template fastapi --auth apikey
+
+# Basic Auth
+projex create my-api --template fastapi --auth basic
+```
+
+### Template Styles
+
+```bash
+# Minimal (bare minimum)
+projex create my-api --template fastapi --style minimal
+
+# Standard (default)
+projex create my-api --template fastapi --style standard
+
+# Full (everything included)
+projex create my-api --template fastapi --style full
+```
+
+### Dependency Management
+
+```bash
+cd my-project
+
+# Check outdated packages
+projex deps check
+
+# Update specific package
+projex deps update --package fastapi
+
+# Update all packages (interactive)
+projex deps update
+
+# Security audit
+projex deps audit
+```
+
+### Environment Configuration
+
+```bash
+cd my-project
+
+# Create environment files
+projex env add development
+projex env add staging
+projex env add production
+projex env add test
+
+# List all environments
+projex env list
+
+# View environment variables
+projex env show .env.development
+projex env show .env.production
+```
+
+### Documentation Setup
+
+```bash
+cd my-project
+
+# MkDocs (recommended for most projects)
+projex add docs --tool mkdocs
+mkdocs serve  # Start local server
+mkdocs build  # Build static site
+mkdocs gh-deploy  # Deploy to GitHub Pages
+
+# Sphinx (for complex documentation)
+projex add docs --tool sphinx
+cd docs && make html
+```
+
+### Testing Workflow
+
+```bash
+cd my-project
+
+# Add enhanced test configuration
+projex add test-config --enhanced
+
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=app --cov-report=html
+
+# Run only unit tests
+pytest -m unit
+
+# Skip slow tests
+pytest -m "not slow"
+
+# Run integration tests
+pytest -m integration
+```
+
+### Project Validation
+
+```bash
+cd my-project
+
+# Validate project structure
+projex validate
+
+# Show detailed project info
+projex info
+
+# Doctor command (alias for validate)
+projex doctor
+```
+
 ## More Examples
 
 Check out our [Examples Repository](https://github.com/ChAbdulWahhab/projex-examples) for:

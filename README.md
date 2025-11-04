@@ -8,50 +8,55 @@ A powerful CLI tool to generate production-ready Python project boilerplates ins
 ## ✨ Features
 
 * 🚀 **Quick Setup** - Generate complete project structures in seconds
-* 🎯 **Multiple Templates** - FastAPI, Django, and Flask templates
+* 🎯 **8 Framework Templates** - FastAPI, Django, Flask, Bottle, Pyramid, Tornado, Sanic, CherryPy
 * 📦 **Batteries Included** - Pre-configured with best practices
 * 🐳 **Docker Ready** - Includes Dockerfile and docker-compose
 * ✅ **Testing Setup** - pytest configuration out of the box
-* 🔧 **Customizable** - Easy to modify and extend
+* 🔧 **Smart Scaffolding** - Add models, endpoints, services, middleware with one command
+* 🔐 **Authentication Options** - JWT, OAuth2, API Key, Basic Auth
+* 🗄️ **Multiple Databases** - PostgreSQL, MySQL, MongoDB, SQLite, Redis
 * 🎨 **Beautiful CLI** - Rich terminal output with progress indicators
+* 🔄 **CI/CD Ready** - Generate GitHub Actions, GitLab CI, CircleCI configs
+* 📚 **Documentation** - MkDocs and Sphinx setup
+* 🧪 **Enhanced Testing** - Advanced pytest configs, fixtures, factories
+* 🔍 **Project Validation** - Validate project structure and dependencies
+* 📊 **Dependency Management** - Check outdated packages, security audits
+* 🌍 **Environment Management** - Multiple environment configurations
+* 📝 **Makefile Generator** - Common development tasks
 
 ## 📋 Available Templates
 
 ### FastAPI
-
 Modern, fast API framework with automatic documentation
 
-* ✅ Async/await support
-* ✅ Automatic API docs (Swagger UI)
-* ✅ Pydantic models for validation
-* ✅ SQLAlchemy ORM integration
-* ✅ Alembic migrations
-* ✅ JWT authentication ready
-* ✅ Docker support
-
 ### Django
-
 Batteries-included web framework for perfectionists
 
-* ✅ Django REST Framework
-* ✅ Admin panel
-* ✅ ORM with migrations
-* ✅ Custom user model ready
-* ✅ CORS headers configured
-* ✅ Environment variables
-* ✅ pytest-django setup
-
 ### Flask
-
 Lightweight and flexible web framework
 
-* ✅ Flask-RESTful
-* ✅ Flask-SQLAlchemy
-* ✅ Flask-Migrate
-* ✅ JWT authentication
+### Bottle
+Micro web framework - simple and fast
+
+### Pyramid
+Flexible, scalable web framework
+
+### Tornado
+Async web framework and networking library
+
+### Sanic
+Fast async framework built on uvloop
+
+### CherryPy
+Minimalist Python web framework
+
+All templates include:
+* ✅ Docker support
+* ✅ Database integration
+* ✅ Testing setup (pytest)
+* ✅ Environment configuration
 * ✅ CORS support
-* ✅ Blueprints structure
-* ✅ Config management
+* ✅ Best practices structure
 
 ## 🚀 Installation
 
@@ -98,19 +103,117 @@ projex create my-app --template flask
 projex create [PROJECT_NAME] [OPTIONS]
 
 Options:
-  -t, --template [fastapi|django|flask]  Project template type
-  -p, --path PATH                        Directory path (default: current)
-  -a, --author TEXT                      Author name
-  -d, --description TEXT                 Project description
-  --no-git                               Skip git initialization
-  --no-venv                              Skip virtual environment creation
-  --help                                 Show help message
+  -t, --template TEMPLATE    Framework template (fastapi, django, flask, etc.)
+  -p, --path PATH            Directory path (default: current)
+  -a, --author TEXT          Author name
+  -d, --description TEXT     Project description
+  --db DATABASE              Database type (postgresql, mysql, mongodb, sqlite, redis)
+  --style STYLE              Template style (minimal, standard, full)
+  --auth AUTH                Authentication (jwt, oauth2, apikey, basic)
+  --license LICENSE          License type (mit, apache, gpl, bsd, unlicense)
+  --gitignore TEMPLATES      Gitignore templates (python,venv,pycharm, etc.)
+  --no-git                   Skip git initialization
+  --no-venv                  Skip virtual environment creation
 ```
 
 ### List Available Templates
 
 ```bash
 projex list
+```
+
+## 🛠️ Advanced Commands
+
+### Smart Scaffolding
+
+Add components to your project:
+
+```bash
+# Add a model
+projex add model User --fields name:str,email:str,age:int
+
+# Add CRUD endpoints
+projex add endpoint users --crud
+
+# Add a service
+projex add service email --async
+
+# Add middleware
+projex add middleware cors
+```
+
+### CI/CD Pipeline Generation
+
+```bash
+# GitHub Actions
+projex add cicd --provider github
+
+# GitLab CI
+projex add cicd --provider gitlab
+
+# CircleCI
+projex add cicd --provider circle
+```
+
+### Environment Management
+
+```bash
+# Add environment files
+projex env add development
+projex env add staging
+projex env add production
+
+# List environment files
+projex env list
+
+# Show environment variables
+projex env show .env.development
+```
+
+### Dependency Management
+
+```bash
+# Check outdated packages
+projex deps check
+
+# Update packages
+projex deps update
+
+# Security audit
+projex deps audit
+```
+
+### Documentation Setup
+
+```bash
+# MkDocs (default)
+projex add docs --tool mkdocs
+
+# Sphinx
+projex add docs --tool sphinx
+```
+
+### Testing Enhancements
+
+```bash
+# Enhanced test configuration
+projex add test-config --enhanced
+```
+
+### Additional Tools
+
+```bash
+# Generate Makefile
+projex add makefile
+
+# Add quality tools (black, isort, flake8, mypy)
+projex add quality-tools
+
+# Validate project
+projex validate
+
+# Show project info
+projex info
 ```
 
 ## 📁 Generated Project Structure
@@ -326,16 +429,55 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Ch Abdul Wahhab**
 Project Link: [https://github.com/ChAbdulWahhab/projex](https://github.com/ChAbdulWahhab/projex)
 
+## 🎯 Use Cases
+
+### Microservices Architecture
+```bash
+projex create user-service --template fastapi
+projex create order-service --template fastapi
+projex create payment-service --template fastapi
+```
+
+### Full-Stack Application
+```bash
+# Backend API
+projex create backend --template fastapi --db postgresql --auth jwt
+
+# Admin Dashboard
+projex create admin --template django
+```
+
+### Production-Ready API
+```bash
+projex create my-api --template fastapi \
+  --db postgresql \
+  --auth jwt \
+  --style full \
+  --license mit
+
+cd my-api
+projex add cicd --provider github
+projex add docs --tool mkdocs
+projex add quality-tools
+projex env add production
+```
+
 ## 🗺️ Roadmap
 
+* [x] Multiple framework templates (8 frameworks)
+* [x] Database selection (5 databases)
+* [x] Authentication options
+* [x] CI/CD pipeline generation
+* [x] Environment management
+* [x] Dependency management
+* [x] Documentation setup
+* [x] Smart scaffolding system
+* [x] Project validation
 * [ ] Add React/Next.js frontend templates
 * [ ] Add GraphQL templates
-* [ ] Add microservices architecture templates
-* [ ] Add CI/CD pipeline configurations
 * [ ] Add Kubernetes deployment files
 * [ ] Interactive template customization
 * [ ] Plugin system for custom templates
-* [ ] Project template marketplace
 
 ---
 

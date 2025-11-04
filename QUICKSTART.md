@@ -223,9 +223,97 @@ Every generated project includes:
 ✅ .gitignore file
 ✅ API examples
 
+## Advanced Features
+
+### Smart Scaffolding
+
+After creating your project, add components easily:
+
+```bash
+cd my-api
+
+# Add a model
+projex add model Product --fields name:str,price:float,stock:int
+
+# Add CRUD endpoints
+projex add endpoint products --crud
+
+# Add a service
+projex add service payment --async
+```
+
+### CI/CD Setup
+
+```bash
+# Add GitHub Actions
+projex add cicd --provider github
+
+# Or GitLab CI
+projex add cicd --provider gitlab
+```
+
+### Environment Management
+
+```bash
+# Create environment files
+projex env add development
+projex env add staging
+projex env add production
+
+# List environments
+projex env list
+```
+
+### Dependency Management
+
+```bash
+# Check for outdated packages
+projex deps check
+
+# Update packages safely
+projex deps update
+
+# Security audit
+projex deps audit
+```
+
+### Documentation
+
+```bash
+# Add MkDocs documentation
+projex add docs --tool mkdocs
+
+# Start docs server
+mkdocs serve
+```
+
+### Testing
+
+```bash
+# Enhanced test configuration
+projex add test-config --enhanced
+
+# Run tests
+pytest
+
+# With coverage
+pytest --cov=app
+```
+
+### Project Validation
+
+```bash
+# Validate project structure
+projex validate
+
+# Show project info
+projex info
+```
+
 ## Need Help?
 
 * 📖 Read the full [README.md](README.md)
+* 📚 Check [EXAMPLES.md](EXAMPLES.md) for more examples
 * 🐛 [Report bugs](https://github.com/ChAbdulWahhab/projex/issues)
 * 💬 [Ask questions](https://github.com/ChAbdulWahhab/projex/discussions)
 * 🤝 [Contribute](CONTRIBUTING.md)
