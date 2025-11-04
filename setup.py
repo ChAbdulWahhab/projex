@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="projex-cli",
-    version="0.1.3",
+    version="4.0.0",
     author="Ch. Abdul Wahab",
     author_email="ch.abdul.wahhab@proton.me",
     description="A powerful CLI tool to generate Python project boilerplates",
@@ -32,8 +32,9 @@ setup(
     install_requires=[
         "click>=8.0.0",
         "jinja2>=3.0.0",
-        "rich>=10.0.0",
+        "rich>=13.0.0",
         "pyyaml>=6.0",
+        "requests>=2.31.0",
     ],
     entry_points={
         "console_scripts": [
