@@ -1080,7 +1080,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 * 📧 **Email:** ch.abdul.wahhab@proton.me
 * 💬 **Discussions:** [GitHub Discussions](https://github.com/ChAbdulWahhab/projex/discussions)
 * 🐛 **Bug Reports:** [GitHub Issues](https://github.com/ChAbdulWahhab/projex/issues)
-* 📖 **Documentation:** [Full Docs](https://projex.readthedocs.io)
+* 📖 **Documentation:** [Full Docs](https://chabdulwahhab.github.io/projex/)
 
 ## 🗺️ Roadmap
 
