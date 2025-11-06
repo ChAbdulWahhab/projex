@@ -1,4 +1,7 @@
-# 🔨 Projex
+<p>
+  <h1>Projex</h1>
+  <img src="https://i.imgur.com/Mcm57CN.png" alt="Projex Logo" width="90"/>
+</p>
 
 A powerful CLI tool to generate production-ready Python project boilerplates instantly. Skip the boring setup and jump straight into coding!
 

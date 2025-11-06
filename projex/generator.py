@@ -84,7 +84,24 @@ class ProjectGenerator:
         if self.create_venv:
             self._create_virtualenv()
         
+        # Post-generation validation
+        self._validate_generation()
+        
         return self.project_path
+    
+    def _read_welcome_template(self, framework: str) -> str:
+        """Read the bundled welcome.html for a framework from projex/templates.
+
+        Falls back to a minimal HTML if file not found.
+        """
+        try:
+            here = Path(__file__).resolve().parent
+            tpl = here / 'templates' / framework / 'welcome.html'
+            if tpl.exists():
+                return tpl.read_text(encoding='utf-8')
+        except Exception:
+            pass
+        return '<!doctype html><title>Welcome</title><h1>Welcome</h1>'
     
     def _generate_fastapi(self):
         """Generate FastAPI project structure"""
@@ -95,8 +112,10 @@ class ProjectGenerator:
         (app_dir / '__init__.py').write_text('')
         
         # Create main.py
+        welcome_html = self._read_welcome_template('fastapi')
         main_content = '''from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from app.core.config import settings
 from app.api.v1.router import api_router
 
@@ -116,15 +135,21 @@ app.add_middleware(
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
+WELCOME_TEMPLATE = r"""''' + welcome_html.replace('"""', '\\"""') + '''"""
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 async def root():
-    return {"message": "Welcome to ''' + self.project_name + '''"}
+    return HTMLResponse(WELCOME_TEMPLATE)
 
 
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
+    
+
+@app.get("/hello/{name}")
+async def say_hello(name: str):
+    return {"message": f"Hello, {name}!"}
 '''
         (app_dir / 'main.py').write_text(main_content)
         
@@ -246,19 +271,28 @@ client = TestClient(app)
 def test_root():
     response = client.get("/")
     assert response.status_code == 200
-    assert "message" in response.json()
+    assert "Your server is running" in response.text
 
 
 def test_health_check():
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "healthy"}
+
+
+def test_hello_endpoint():
+    response = client.get("/hello/Alice")
+    assert response.status_code == 200
+    assert response.json() == {"message": "Hello, Alice!"}
 ''')
     
     def _generate_django(self):
         """Generate Django project structure"""
         # Django needs to be installed to run django-admin
         # We'll create the basic structure manually
+        
+        # Read welcome template
+        welcome_html = self._read_welcome_template('django')
         
         project_slug = self.project_name.replace('-', '_').replace(' ', '_').lower()
         
@@ -361,8 +395,10 @@ REST_FRAMEWORK = {{
         # URLs
         (config_dir / 'urls.py').write_text('''from django.contrib import admin
 from django.urls import path, include
+from apps.core.views import index
 
 urlpatterns = [
+    path('', index, name='index'),
     path('admin/', admin.site.urls),
     path('api/', include('apps.core.urls')),
 ]
@@ -423,17 +459,30 @@ class CoreConfig(AppConfig):
         (core_dir / 'models.py').write_text('from django.db import models\n')
         (core_dir / 'views.py').write_text('''from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.http import HttpResponse
+
+WELCOME_TEMPLATE = r"""''' + welcome_html.replace('"""', '\\"""') + '''"""
+
+
+def index(request):
+    return HttpResponse(WELCOME_TEMPLATE)
 
 
 @api_view(['GET'])
 def health_check(request):
     return Response({'status': 'healthy'})
+
+
+@api_view(['GET'])
+def hello(request, name: str):
+    return Response({'message': f'Hello, {name}!'})
 ''')
         (core_dir / 'urls.py').write_text('''from django.urls import path
 from . import views
 
 urlpatterns = [
     path('health/', views.health_check, name='health'),
+    path('hello/<str:name>/', views.hello, name='hello'),
 ]
 ''')
         
@@ -448,6 +497,11 @@ class HealthCheckTest(TestCase):
         response = self.client.get(reverse('health'))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {'status': 'healthy'})
+
+    def test_hello(self):
+        response = self.client.get(reverse('hello', kwargs={'name': 'World'}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {'message': 'Hello, World!'})
 ''')
     
     def _generate_flask(self):
@@ -455,8 +509,11 @@ class HealthCheckTest(TestCase):
         app_dir = self.project_path / 'app'
         app_dir.mkdir()
         
+        # Read welcome template
+        welcome_html = self._read_welcome_template('flask')
+        
         # Create __init__.py with app factory
-        init_content = '''from flask import Flask
+        init_content = '''from flask import Flask, render_template_string, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
@@ -466,6 +523,8 @@ from app.config import config
 db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
+
+WELCOME_TEMPLATE = r"""''' + welcome_html.replace('"""', '\\"""') + '''"""
 
 
 def create_app(config_name='development'):
@@ -484,11 +543,15 @@ def create_app(config_name='development'):
     
     @app.route('/')
     def index():
-        return {'message': 'Welcome to ''' + self.project_name + ''''}
+        return render_template_string(WELCOME_TEMPLATE)
     
     @app.route('/health')
     def health():
         return {'status': 'healthy'}
+    
+    @app.route('/hello/<name>')
+    def hello(name):
+        return jsonify({'message': f'Hello, {name}!'}), 200
     
     return app
 '''
@@ -598,13 +661,19 @@ def client():
 def test_index(client):
     response = client.get('/')
     assert response.status_code == 200
-    assert b'message' in response.data
+    assert b'Your server is running' in response.data
 
 
 def test_health(client):
     response = client.get('/health')
     assert response.status_code == 200
     assert response.json == {'status': 'healthy'}
+
+
+def test_hello(client):
+    response = client.get('/hello/Alice')
+    assert response.status_code == 200
+    assert response.json == {'message': 'Hello, Alice!'}
 ''')
     
     def _generate_bottle(self):
@@ -615,6 +684,9 @@ def test_health(client):
         # Create __init__.py
         (app_dir / '__init__.py').write_text('')
         
+        # Read welcome template
+        welcome_html = self._read_welcome_template('bottle')
+        
         # Create main.py
         main_content = f'''import os
 from bottle import Bottle, run, request, response
@@ -624,6 +696,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Bottle()
+
+WELCOME_TEMPLATE = r"""''' + welcome_html.replace('"""', '\\"""') + f'''"""
 
 
 def enable_cors():
@@ -640,12 +714,17 @@ def after_request():
 
 @app.route('/')
 def index():
-    return {{"message": "Welcome to {self.project_name}"}}
+    return HTTPResponse(WELCOME_TEMPLATE)
 
 
 @app.route('/health')
 def health():
     return {{"status": "healthy"}}
+
+
+@app.route('/hello/<name>')
+def hello(name):
+    return {{"message": f"Hello, {name}!"}}
 
 
 @app.route('/api/items', method='GET')
@@ -736,6 +815,9 @@ def test_health():
         # Create __init__.py
         (app_dir / '__init__.py').write_text('')
         
+        # Read welcome template
+        welcome_html = self._read_welcome_template('pyramid')
+        
         # Create main.py
         main_content = f'''from pyramid.config import Configurator
 from pyramid.response import Response
@@ -745,10 +827,12 @@ import os
 
 load_dotenv()
 
+WELCOME_TEMPLATE = r"""''' + welcome_html.replace('"""', '\\"""') + f'''"""
 
-@view_config(route_name='home', renderer='json')
+
+@view_config(route_name='home')
 def home(request):
-    return {{"message": "Welcome to {self.project_name}"}}
+    return Response(WELCOME_TEMPLATE)
 
 
 @view_config(route_name='health', renderer='json')
@@ -765,6 +849,12 @@ def get_items(request):
     return {{"items": items}}
 
 
+@view_config(route_name='hello', renderer='json')
+def hello(request):
+    name = request.matchdict.get('name', 'World')
+    return {{"message": f"Hello, {name}!"}}
+
+
 def main(global_config, **settings):
     """This function returns a Pyramid WSGI application."""
     config = Configurator(settings=settings)
@@ -774,6 +864,7 @@ def main(global_config, **settings):
     config.add_route('home', '/')
     config.add_route('health', '/health')
     config.add_route('items', '/api/items')
+    config.add_route('hello', '/hello/{name}')
     config.scan()
     
     return config.make_wsgi_app()
@@ -862,6 +953,9 @@ def test_get_items():
         # Create __init__.py
         (app_dir / '__init__.py').write_text('')
         
+        # Read welcome template
+        welcome_html = self._read_welcome_template('tornado')
+        
         # Create main.py
         main_content = f'''import tornado.ioloop
 import tornado.web
@@ -873,10 +967,12 @@ load_dotenv()
 
 tornado.options.define("port", default=8000, help="run on the given port", type=int)
 
+WELCOME_TEMPLATE = r"""''' + welcome_html.replace('"""', '\\"""') + f'''"""
+
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write({{"message": "Welcome to {self.project_name}"}})
+        self.write(WELCOME_TEMPLATE)
 
 
 class HealthHandler(tornado.web.RequestHandler):
@@ -904,6 +1000,11 @@ class ItemHandler(tornado.web.RequestHandler):
         self.write(item)
 
 
+class HelloHandler(tornado.web.RequestHandler):
+    def get(self, name):
+        self.write({{"message": f"Hello, {{name}}!"}})
+
+
 def make_app():
     settings = {{
         "debug": os.getenv("DEBUG", "True").lower() == "true",
@@ -914,16 +1015,59 @@ def make_app():
         (r"/health", HealthHandler),
         (r"/api/items", ItemsHandler),
         (r"/api/items/([0-9]+)", ItemHandler),
+        (r"/hello/([A-Za-z0-9_%-]+)", HelloHandler),
     ], **settings)
 
 
 if __name__ == "__main__":
     tornado.options.parse_command_line()
     app = make_app()
+'''
+        (app_dir / 'main.py').write_text(main_content)
+    
+    def _generate_sanic(self):
+        """Generate Sanic project structure"""
+        app_dir = self.project_path / 'app'
+        app_dir.mkdir()
+        
+        # Create __init__.py
+        (app_dir / '__init__.py').write_text('')
+        
+        # Read welcome template
+        welcome_html = self._read_welcome_template('sanic')
+        
+        # Create main.py
+        main_content = f'''from sanic import Sanic
+from sanic.response import json, html
+from sanic_ext import Extend
+from sanic_cors import CORS
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+app = Sanic("{self.project_name}")
+
+# Enable CORS
+CORS(app, resources={{r"/api/*": {{"origins": "*"}}}})
+
+# Enable OpenAPI docs
+Extend(app)
+
+WELCOME_TEMPLATE = r"""''' + welcome_html.replace('"""', '\\"""') + f'''"""
+
+
+@app.get("/")
+async def index(request):
+    return html(WELCOME_TEMPLATE)
+
+@app.get("/hello/<name>")
+async def hello(request, name: str):
+    return json({"message": f"Hello, {name}!"})
+
+if __name__ == "__main__":
     port = int(os.getenv('PORT', 8000))
-    app.listen(port)
-    print(f"Starting server on port {{port}}")
-    tornado.ioloop.IOLoop.current().start()
+    app.run(host="0.0.0.0", port=port, debug=True, auto_reload=True)
 '''
         (app_dir / 'main.py').write_text(main_content)
         
@@ -982,126 +1126,6 @@ class TestApp(AsyncHTTPTestCase):
         self.assertEqual(data, {"status": "healthy"})
 ''')
     
-    def _generate_sanic(self):
-        """Generate Sanic project structure"""
-        app_dir = self.project_path / 'app'
-        app_dir.mkdir()
-        
-        # Create __init__.py
-        (app_dir / '__init__.py').write_text('')
-        
-        # Create main.py
-        main_content = f'''from sanic import Sanic
-from sanic.response import json
-from sanic_ext import Extend
-from sanic_cors import CORS
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-app = Sanic("{self.project_name}")
-
-# Enable CORS
-CORS(app, resources={{r"/api/*": {{"origins": "*"}}}})
-
-# Enable OpenAPI docs
-Extend(app)
-
-
-@app.get("/")
-async def index(request):
-    return json({{"message": "Welcome to {self.project_name}"}})
-
-
-@app.get("/health")
-async def health(request):
-    return json({{"status": "healthy"}})
-
-
-@app.get("/api/items")
-async def get_items(request):
-    items = [
-        {{"id": 1, "name": "Item 1", "description": "First item"}},
-        {{"id": 2, "name": "Item 2", "description": "Second item"}},
-    ]
-    return json({{"items": items}})
-
-
-@app.get("/api/items/<item_id:int>")
-async def get_item(request, item_id):
-    item = {{"id": item_id, "name": f"Item {{item_id}}"}}
-    return json(item)
-
-
-@app.post("/api/items")
-async def create_item(request):
-    data = request.json
-    return json({{"message": "Item created", "data": data}}, status=201)
-
-
-if __name__ == "__main__":
-    port = int(os.getenv('PORT', 8000))
-    app.run(host="0.0.0.0", port=port, debug=True, auto_reload=True)
-'''
-        (app_dir / 'main.py').write_text(main_content)
-        
-        # Create config.py
-        config_content = '''import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-
-class Settings:
-    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key')
-    DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://user:password@localhost:5432/dbname')
-    DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
-    PORT = int(os.getenv('PORT', 8000))
-    ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
-'''
-        (app_dir / 'config.py').write_text(config_content)
-        
-        # Create routes directory
-        routes_dir = app_dir / 'routes'
-        routes_dir.mkdir()
-        (routes_dir / '__init__.py').write_text('')
-        
-        # Create models directory
-        models_dir = app_dir / 'models'
-        models_dir.mkdir()
-        (models_dir / '__init__.py').write_text('')
-        
-        # Create tests (skip for minimal style)
-        if self.style != 'minimal':
-            tests_dir = self.project_path / 'tests'
-            tests_dir.mkdir()
-            (tests_dir / '__init__.py').write_text('')
-            (tests_dir / 'test_main.py').write_text('''import pytest
-from sanic import Sanic
-from app.main import app
-
-
-@pytest.fixture
-def test_client():
-    return app.test_client
-
-
-@pytest.mark.asyncio
-async def test_index(test_client):
-    request, response = await test_client.get('/')
-    assert response.status == 200
-    data = response.json
-    assert 'message' in data
-
-
-@pytest.mark.asyncio
-async def test_health(test_client):
-    request, response = await test_client.get('/health')
-    assert response.status == 200
-    assert response.json == {"status": "healthy"}
-''')
-    
     def _generate_cherrypy(self):
         """Generate CherryPy project structure"""
         app_dir = self.project_path / 'app'
@@ -1110,6 +1134,9 @@ async def test_health(test_client):
         # Create __init__.py
         (app_dir / '__init__.py').write_text('')
         
+        # Read welcome template
+        welcome_html = self._read_welcome_template('cherrypy')
+        
         # Create main.py
         main_content = f'''import cherrypy
 import os
@@ -1117,17 +1144,23 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+WELCOME_TEMPLATE = r"""''' + welcome_html.replace('"""', '\\"""') + f'''"""
+
 
 class Root:
     @cherrypy.expose
-    @cherrypy.tools.json_out()
     def index(self):
-        return {{"message": "Welcome to {self.project_name}"}}
+        return WELCOME_TEMPLATE
     
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def health(self):
-        return {{"status": "healthy"}}
+        return {"status": "healthy"}
+
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def hello(self, name):
+        return {"message": f"Hello, {name}!"}
 
 
 class ItemsAPI:
@@ -1421,10 +1454,14 @@ def get_db():
             if config_file.exists():
                 content = config_file.read_text()
                 import re
+                # Match single or multi-line SQLALCHEMY_DATABASE_URI assignment
+                db_url = config['url']
+                replacement = f"SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \\\n        '{db_url}'"
                 content = re.sub(
-                    r"SQLALCHEMY_DATABASE_URI = os\.environ\.get\('DATABASE_URL'\).*",
-                    f"SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or '{config['url']}'",
-                    content
+                    r"SQLALCHEMY_DATABASE_URI = os\.environ\.get\('DATABASE_URL'\)\s+or\s+\\?\s*'[^']*'",
+                    replacement,
+                    content,
+                    flags=re.MULTILINE
                 )
                 config_file.write_text(content)
         
@@ -2788,3 +2825,26 @@ PORT={self._get_default_port()}
             'cherrypy': '8000'
         }
         return ports.get(self.template_type, '8000')
+
+    def _validate_generation(self) -> None:
+        """Lightweight sanity checks to ensure the generated project is runnable."""
+        try:
+            # Common checks
+            assert (self.project_path / 'requirements.txt').exists(), 'requirements.txt missing'
+            # Template specific entry files
+            entrypoints = {
+                'fastapi': self.project_path / 'app' / 'main.py',
+                'flask': self.project_path / 'run.py',
+                'django': self.project_path / 'manage.py',
+                'bottle': self.project_path / 'app' / 'main.py',
+                'pyramid': self.project_path / 'run.py',
+                'tornado': self.project_path / 'app' / 'main.py',
+                'sanic': self.project_path / 'app' / 'main.py',
+                'cherrypy': self.project_path / 'app' / 'main.py',
+            }
+            entry = entrypoints.get(self.template_type)
+            if entry is not None:
+                assert entry.exists(), f'Entrypoint not found: {entry}'
+        except AssertionError as e:
+            # Surface a clear error to the CLI layer
+            raise RuntimeError(f"Post-generation validation failed: {e}")

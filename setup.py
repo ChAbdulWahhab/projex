@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="projex-cli",
-    version="4.0.0",
+    version="4.0.1",
     author="Ch. Abdul Wahab",
     author_email="ch.abdul.wahhab@proton.me",
     description="A powerful CLI tool to generate Python project boilerplates",
@@ -18,7 +18,7 @@ setup(
     },
     packages=find_packages(),
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Code Generators",
         "License :: OSI Approved :: MIT License",
@@ -27,6 +27,7 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
     python_requires=">=3.8",
     install_requires=[

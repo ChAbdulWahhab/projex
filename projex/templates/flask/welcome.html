@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+<title>Flask - Powered by Projex</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root[data-theme="light"] {
+    --bg: #ffffff;
+    --text: #171717;
+    --text-secondary: #737373;
+    --border: #e5e5e5;
+    --card-bg: #fafafa;
+    --card-hover: #f5f5f5;
+    --accent: #000000;
+    --shadow: rgba(0, 0, 0, 0.05);
+    --glow-1: rgba(0, 0, 0, 0.15);
+    --glow-2: rgba(255, 107, 107, 0.2);
+}
+
+:root[data-theme="dark"] {
+    --bg: #000000;
+    --text: #ededed;
+    --text-secondary: #a3a3a3;
+    --border: #262626;
+    --card-bg: #0a0a0a;
+    --card-hover: #171717;
+    --accent: #ffffff;
+    --shadow: rgba(255, 255, 255, 0.05);
+    --glow-1: rgba(255, 255, 255, 0.1);
+    --glow-2: rgba(255, 107, 107, 0.15);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    transition: background 0.3s, color 0.3s;
+    line-height: 1.6;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+.glow-circle {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.glow-1 {
+    width: 500px;
+    height: 500px;
+    background: var(--glow-1);
+    top: -250px;
+    right: -100px;
+}
+
+.glow-2 {
+    width: 400px;
+    height: 400px;
+    background: var(--glow-2);
+    bottom: -200px;
+    left: -100px;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.logo {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.04em;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 1.5rem;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.section {
+    margin-bottom: 3rem;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+}
+
+.routes {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.route-item {
+    display: flex;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+}
+
+.route-item:last-child {
+    border-bottom: none;
+}
+
+.route-item:hover {
+    background: var(--card-hover);
+}
+
+.method {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.625rem;
+    border-radius: 6px;
+    margin-right: 1rem;
+    min-width: 50px;
+    text-align: center;
+}
+
+.method.get {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+:root[data-theme="dark"] .method.get {
+    background: #1e3a8a;
+    color: #93c5fd;
+}
+
+.route-path {
+    font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9375rem;
+    color: var(--text);
+    flex: 1;
+}
+
+.route-desc {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 3rem;
+}
+
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.card:hover {
+    border-color: var(--accent);
+    background: var(--card-hover);
+}
+
+.card-icon {
+    font-size: 1.5rem;
+}
+
+.card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.card-desc {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.footer {
+    text-align: center;
+    padding-top: 3rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.footer a {
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.footer a:hover {
+    color: var(--accent);
+}
+
+.theme-toggle {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    z-index: 100;
+}
+
+.theme-toggle:hover {
+    border-color: var(--accent);
+}
+
+.theme-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--text);
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 3rem 1rem;
+    }
+    
+    .title {
+        font-size: 2.25rem;
+    }
+    
+    .cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .route-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .glow-1, .glow-2 {
+        display: none;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="glow-circle glow-1"></div>
+<div class="glow-circle glow-2"></div>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <svg class="theme-icon" id="sunIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+    </svg>
+    <svg class="theme-icon" id="moonIcon" style="display:none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+    </svg>
+</button>
+
+<div class="container">
+    <header class="header">
+        <div class="logo"><i class="bi bi-flask"></i></div>
+        <h1 class="title">Flask</h1>
+        <p class="subtitle">Lightweight WSGI web application framework</p>
+        <div class="badge">
+            <span class="status-dot"></span>
+            <span>Server running</span>
+            <span style="margin-left:8px; font-weight:600;">Your server is running on <span id="hostPort"></span></span>
+        </div>
+    </header>
+
+    <section class="section">
+        <h2 class="section-title">Available Routes</h2>
+        <div class="routes">
+            <div class="route-item">
+                <span class="method get">GET</span>
+                <code class="route-path">/</code>
+                <span class="route-desc">Welcome page</span>
+            </div>
+            <div class="route-item">
+                <span class="method get">GET</span>
+                <code class="route-path">/api</code>
+                <span class="route-desc">API endpoints</span>
+            </div>
+            <div class="route-item">
+                <span class="method get">GET</span>
+                <code class="route-path">/hello/&lt;name&gt;</code>
+                <span class="route-desc">Personalized greeting</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title">Quick Links</h2>
+        <div class="cards">
+            <a href="/api" class="card">
+                <div class="card-icon"><i class="bi bi-code-square"></i></div>
+                <div class="card-title">API Routes</div>
+                <div class="card-desc">Explore available API endpoints</div>
+            </a>
+            <a href="https://flask.palletsprojects.com/" target="_blank" class="card">
+                <div class="card-icon"><i class="bi bi-book"></i></div>
+                <div class="card-title">Documentation</div>
+                <div class="card-desc">Official Flask documentation</div>
+            </a>
+            <a href="https://chabdulwahhab.github.io/projex/" target="_blank" class="card">
+                <div class="card-icon"><i class="bi bi-stars"></i></div>
+                <div class="card-title">Projex CLI</div>
+                <div class="card-desc">Project generator documentation</div>
+            </a>
+            <a href="https://github.com/ChAbdulWahhab/projex" target="_blank" class="card">
+                <div class="card-icon"><i class="bi bi-github"></i></div>
+                <div class="card-title">Star on GitHub</div>
+                <div class="card-desc">Support the Projex project</div>
+            </a>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>Generated by <a href="https://github.com/ChAbdulWahhab/projex" target="_blank">Projex CLI</a></p>
+    </footer>
+</div>
+
+<script>
+const toggle = document.getElementById('themeToggle');
+const html = document.documentElement;
+const sunIcon = document.getElementById('sunIcon');
+const moonIcon = document.getElementById('moonIcon');
+const hostPort = document.getElementById('hostPort');
+
+const savedTheme = localStorage.getItem('theme') || 
+    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+html.setAttribute('data-theme', savedTheme);
+updateIcons(savedTheme);
+// Set host:port info
+try {
+    hostPort.textContent = window.location.host || 'localhost:5000';
+} catch (e) {
+    hostPort.textContent = 'localhost:5000';
+}
+
+toggle.addEventListener('click', () => {
+    const current = html.getAttribute('data-theme');
+    const newTheme = current === 'light' ? 'dark' : 'light';
+    html.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateIcons(newTheme);
+});
+
+function updateIcons(theme) {
+    if (theme === 'dark') {
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'block';
+    } else {
+        sunIcon.style.display = 'block';
+        moonIcon.style.display = 'none';
+    }
+}
+</script>
+
+</body>
+</html>
